@@ -28,6 +28,7 @@ export PATH=`go env GOPATH`/bin:$PATH
 #
 # Generate Telemetry message code
 #
+mkdir -p src/telemetry
 protoc \
     -I$PROTO_ARCHIVE \
     $PROTO_ARCHIVE/telemetry.proto \
@@ -36,7 +37,8 @@ protoc \
 #
 # Generate dialout code
 #
+mkdir -p src/mdt_dialout
 protoc \
     -I$PROTO_ARCHIVE/mdt_grpc_dialout \
     $PROTO_ARCHIVE/mdt_grpc_dialout/mdt_grpc_dialout.proto \
-    --go_out=plugins=grpc:src/mdt_grpc_dialout
+    --go_out=plugins=grpc:src/mdt_dialout
