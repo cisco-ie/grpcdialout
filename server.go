@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"net"
 
 	"github.com/golang/protobuf/jsonpb"
@@ -34,43 +36,37 @@ func (d *dummyPeerType) Network() string {
 
 var dummyPeer dummyPeerType
 
-func decrypt(data *dialout.MdtDialoutArgs) error {
+func decrypt(data *dialout.MdtDialoutArgs) {
 	var err error
 	ProtoItem := new(telemetryBis.Telemetry)
 	err = proto.Unmarshal(data.Data, ProtoItem)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	err = printer(ProtoItem)
-	if err != nil {
-		return err
+	if Configuration.Dump {
+		go printer(ProtoItem)
 	}
-
-	return err
+	go kafkaProducer(ProtoItem, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
 }
 
-func printer(ProtoItem proto.Message) error {
-	var err error
+func printer(ProtoItem proto.Message) {
 	var jsonpbObject jsonpb.Marshaler
 	jsonString, err := jsonpbObject.MarshalToString(ProtoItem)
 	if err != nil {
-		return (err)
+		log.Fatal(err)
 	}
 	buf := new(bytes.Buffer)
 	json.Indent(buf, []byte(jsonString), "", "  ")
-	fmt.Println(buf)
-	return err
+	err = ioutil.WriteFile(Configuration.File, buf.Bytes(), 0644)
 }
 
-func kafkaProducer(ProtoItem proto.Message) error {
-	var err error
+func kafkaProducer(ProtoItem proto.Message, topic string, brokers []string) {
 	data, err := json.Marshal(ProtoItem)
 	if err != nil {
-		return (err)
+		log.Fatal(err)
 	}
-	producer := kafka.NewProducer("TelemetryTest", []string{"172.31.96.200:9094"})
+	producer := kafka.NewProducer(topic, brokers)
 	producer.Produce(data)
-	return err
 }
 
 func (s *grpcLocalServer) MdtDialout(stream dialout.GRPCMdtDialout_MdtDialoutServer) error {

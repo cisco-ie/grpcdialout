@@ -1,0 +1,9 @@
+{
+	"kafka": {
+		"brokers": ["localhost:9092"],
+		"topic": "TelemetryTest"
+	},
+	"raw": false,
+	"dump": true,
+	"filename": "telemetry.txt"
+}

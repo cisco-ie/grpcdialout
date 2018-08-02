@@ -11,12 +11,13 @@ type ConfigStruct struct {
 	Kafka KafkaStruct `json:"kafka"`
 	Raw   bool        `json:"raw"`
 	Dump  bool        `json:"dump"`
+	File  string      `json:"filename"`
 }
 
 //KafkaStruct hold kafka config
 type KafkaStruct struct {
-	Broker []string `json:"broker"`
-	Topic  string   `json:"topic"`
+	Brokers []string `json:"broker"`
+	Topic   string   `json:"topic"`
 }
 
 //Configuration is the global config object
@@ -24,7 +25,7 @@ var Configuration ConfigStruct
 
 //ConfigLoader loads config from file
 func ConfigLoader() {
-	viper.SetConfigName("Config")
+	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.SetDefault("raw", false)
 	viper.SetDefault("dump", false)
