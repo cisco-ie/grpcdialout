@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 
@@ -57,7 +56,8 @@ func printer(ProtoItem proto.Message) {
 	}
 	buf := new(bytes.Buffer)
 	json.Indent(buf, []byte(jsonString), "", "  ")
-	err = ioutil.WriteFile(Configuration.File, buf.Bytes(), 0644)
+	f := File{Filename: Configuration.File}
+	f.Write(buf.Bytes())
 }
 
 func kafkaProducer(ProtoItem proto.Message, topic string, brokers []string) {
@@ -106,9 +106,10 @@ func newServer() *grpcLocalServer {
 }
 
 func main() {
-	fmt.Printf("Hello, world.\n")
-
-	lis, _ := net.Listen("tcp", ":57501")
+	fmt.Printf("Starting gRPC Dialout Collector.\n")
+	ConfigLoader()
+	lis, _ := net.Listen("tcp", Configuration.Port)
+	fmt.Printf("gRPC Server starting at: %s", Configuration.Port)
 	grpcServer := grpc.NewServer()
 
 	dialout.RegisterGRPCMdtDialoutServer(grpcServer, newServer())

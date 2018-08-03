@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/spf13/viper"
@@ -11,7 +12,8 @@ type ConfigStruct struct {
 	Kafka KafkaStruct `json:"kafka"`
 	Raw   bool        `json:"raw"`
 	Dump  bool        `json:"dump"`
-	File  string      `json:"filename"`
+	File  string      `json:"file"`
+	Port  string      `json:"port"`
 }
 
 //KafkaStruct hold kafka config
@@ -29,6 +31,7 @@ func ConfigLoader() {
 	viper.AddConfigPath(".")
 	viper.SetDefault("raw", false)
 	viper.SetDefault("dump", false)
+	viper.SetDefault("port", ":57501")
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatalf("fatal error config file: %s", err)
@@ -37,5 +40,6 @@ func ConfigLoader() {
 	if err != nil {
 		log.Fatalf("enable to decode into struct, %v", err)
 	}
+	fmt.Println(Configuration.File)
 
 }
