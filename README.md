@@ -1,6 +1,8 @@
 # Cisco MDT gRPC Dialout Collector
 
-The Cisco MDT (Model Driven Telemetry) gRPC Dialout Collector allows the collection of Cisco's MDT Streaming Telemetry through the gRPC interface on certain IOS XR, NX-OS, and IOS XE devices. The output of the collector is to either a file or to kafka. This collector can only handle the K/V format, not Compact GPB.
+The Cisco MDT (Model Driven Telemetry) gRPC Dialout Collector allows the collection of Cisco's MDT Streaming Telemetry through the gRPC interface on certain IOS XR, NX-OS, and IOS XE devices. The output of the collector is to either a file or to kafka. This collector can only handle the K/V format, not Compact GPB. This collector also does not support TLS at this time.
+
+The intent of this collector is for testing MDT and getting started with it, this collector does not take scale into account and might fail in full production environments.
 
 ## Getting Started
 
