@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/spf13/viper"
@@ -40,6 +39,5 @@ func ConfigLoader() {
 	if err != nil {
 		log.Fatalf("enable to decode into struct, %v", err)
 	}
-	fmt.Println(Configuration.File)
 
 }

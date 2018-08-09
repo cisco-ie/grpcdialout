@@ -36,9 +36,8 @@ func (d *dummyPeerType) Network() string {
 var dummyPeer dummyPeerType
 
 func decrypt(data *dialout.MdtDialoutArgs) {
-	var err error
 	ProtoItem := new(telemetryBis.Telemetry)
-	err = proto.Unmarshal(data.Data, ProtoItem)
+	err := proto.Unmarshal(data.Data, ProtoItem)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -109,7 +108,7 @@ func main() {
 	fmt.Printf("Starting gRPC Dialout Collector.\n")
 	ConfigLoader()
 	lis, _ := net.Listen("tcp", Configuration.Port)
-	fmt.Printf("gRPC Server starting at: %s", Configuration.Port)
+	fmt.Printf("gRPC Server starting at: %s \n", Configuration.Port)
 	grpcServer := grpc.NewServer()
 
 	dialout.RegisterGRPCMdtDialoutServer(grpcServer, newServer())

@@ -1,35 +1,43 @@
-# mdt-go
+# Cisco MDT gRPC Dialout Collector
 
-To get going...
+The Cisco MDT (Model Driven Telemetry) gRPC Dialout Collector allows the collection of Cisco's MDT Streaming Telemetry through the gRPC interface on certain IOS XR, NX-OS, and IOS XE devices. The output of the collector is to either a file or to kafka. This collector can only handle the K/V format, not Compact GPB.
 
-1. From in this directory:
+## Getting Started
 
-    ```
-    export GOPATH=`pwd`
-    ```
+### Config
 
-1. Run `gen_from_protos.sh`, which will install GRPC tools and library dependencies, and compile protofiles.
-2. Build and install the server using `go install server`
-3. Run the server using `./bin/server`
+The collector requires a JSON config file called config.json. Below is an example of the config.
 
-Once you have data being sent to port 2345 wherever you are running the server, success looks like:
-
-```
-$ ./bin/server
-Hello, world.
-Receiving dialout stream from 10.55.106.9:60439!
-ReqId = 0!
-ReqId = 1!
-ReqId = 2!
-ReqId = 3!
-ReqId = 4!
-ReqId = 5!
-ReqId = 6!
-ReqId = 7!
-ReqId = 8!
-ReqId = 9!
-ReqId = 10!
-...etc...
+```json
+{
+	"kafka": {
+		"brokers": ["localhost:9092"],
+		"topic": "TelemetryTest"
+	},
+	"raw": false,
+	"dump": true,
+	"filename": "telemetry.txt"
+}
 ```
 
-Really not very interesting yet!
+The keys `raw` and `dump` are the only required fields. Raw sends outputs the data in the ProtoBuf format rather than running it through the de-serializer. 
+
+If `dump` is true, you can specify the filename if you want it different from the default of `telemetry.txt`. 
+
+If you want to send the data to kafka you will need to speicfy both brokers and topic.
+
+### Getting the tool
+
+#### Using Go
+
+`go get github.com/skkumaravel/grpcdialout`
+
+Then `go build` or `go install`
+
+#### Download the release
+
+Use github to download the release
+
+## Issues
+
+If you run into problems, please use Github Issues and Pull Requests
