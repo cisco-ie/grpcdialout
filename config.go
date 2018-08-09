@@ -39,5 +39,8 @@ func ConfigLoader() {
 	if err != nil {
 		log.Fatalf("enable to decode into struct, %v", err)
 	}
+	if Configuration.Kafka.Brokers == nil && Configuration.Dump == false {
+		log.Fatalln("File and Kafka not set")
+	}
 
 }

@@ -42,28 +42,40 @@ func decrypt(data *dialout.MdtDialoutArgs) {
 		log.Fatal(err)
 	}
 	if Configuration.Dump {
-		go printer(ProtoItem)
+		if Configuration.Raw {
+			go printer(data.Data)
+		} else {
+			var jsonpbObject jsonpb.Marshaler
+			jsonString, err := jsonpbObject.MarshalToString(ProtoItem)
+			if err != nil {
+				log.Fatal(err)
+			}
+			buf := new(bytes.Buffer)
+			json.Indent(buf, []byte(jsonString), "", "  ")
+			go printer(buf.Bytes())
+		}
+
 	}
-	go kafkaProducer(ProtoItem, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
+	if Configuration.Kafka.Brokers != nil {
+		if Configuration.Raw {
+			go kafkaProducer(data.Data, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
+		} else {
+			marshaled, err := json.Marshal(ProtoItem)
+			if err != nil {
+				log.Fatal(err)
+			}
+			go kafkaProducer(marshaled, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
+		}
+	}
+
 }
 
-func printer(ProtoItem proto.Message) {
-	var jsonpbObject jsonpb.Marshaler
-	jsonString, err := jsonpbObject.MarshalToString(ProtoItem)
-	if err != nil {
-		log.Fatal(err)
-	}
-	buf := new(bytes.Buffer)
-	json.Indent(buf, []byte(jsonString), "", "  ")
+func printer(data []byte) {
 	f := File{Filename: Configuration.File}
-	f.Write(buf.Bytes())
+	f.Write(data)
 }
 
-func kafkaProducer(ProtoItem proto.Message, topic string, brokers []string) {
-	data, err := json.Marshal(ProtoItem)
-	if err != nil {
-		log.Fatal(err)
-	}
+func kafkaProducer(data []byte, topic string, brokers []string) {
 	producer := kafka.NewProducer(topic, brokers)
 	producer.Produce(data)
 }
