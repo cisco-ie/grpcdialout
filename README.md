@@ -18,13 +18,16 @@ The collector requires a JSON config file called config.json. Below is an exampl
 	},
 	"raw": false,
 	"dump": true,
-	"filename": "telemetry.txt"
+	"filename": "telemetry.txt",
+	"port": ":59501"
 }
 ```
 
 The keys `raw` and `dump` are the only required fields. Raw sends outputs the data in the ProtoBuf format rather than running it through the de-serializer. 
 
 If `dump` is true, you can specify the filename if you want it different from the default of `telemetry.txt`. 
+
+The key `port` is the port gRPC listens on. It is not required and defaults to ":59501"
 
 If you want to send the data to kafka you will need to speicfy both brokers and topic.
 
