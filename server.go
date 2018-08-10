@@ -10,9 +10,9 @@ import (
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	kafka "github.com/skkumaravel/grpcdialout/kafka-producer"
-	dialout "github.com/skkumaravel/grpcdialout/mdt_dialout"
-	telemetryBis "github.com/skkumaravel/grpcdialout/telemetry_bis"
+	kafka "github.com/cisco-ie/grpcdialout/kafka-producer"
+	dialout "github.com/cisco-ie/grpcdialout/mdt_dialout"
+	telemetryBis "github.com/cisco-ie/grpcdialout/telemetry_bis"
 	grpc "google.golang.org/grpc"
 	peer "google.golang.org/grpc/peer"
 )
