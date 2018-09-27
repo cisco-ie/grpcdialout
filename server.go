@@ -1,18 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
 
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 	kafka "github.com/cisco-ie/grpcdialout/kafka-producer"
 	dialout "github.com/cisco-ie/grpcdialout/mdt_dialout"
 	telemetryBis "github.com/cisco-ie/grpcdialout/telemetry_bis"
+	"github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	peer "google.golang.org/grpc/peer"
 )
@@ -36,36 +34,11 @@ func (d *dummyPeerType) Network() string {
 var dummyPeer dummyPeerType
 
 func decrypt(data *dialout.MdtDialoutArgs) {
-	ProtoItem := new(telemetryBis.Telemetry)
-	err := proto.Unmarshal(data.Data, ProtoItem)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if Configuration.Dump {
-		if Configuration.Raw {
-			go printer(data.Data)
-		} else {
-			var jsonpbObject jsonpb.Marshaler
-			jsonString, err := jsonpbObject.MarshalToString(ProtoItem)
-			if err != nil {
-				log.Fatal(err)
-			}
-			buf := new(bytes.Buffer)
-			json.Indent(buf, []byte(jsonString), "", "  ")
-			go printer(buf.Bytes())
-		}
+	byteChannel := make(chan []byte)
+	byteChannel <- data.Data
 
-	}
 	if Configuration.Kafka.Brokers != nil {
-		if Configuration.Raw {
-			go kafkaProducer(data.Data, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
-		} else {
-			marshaled, err := json.Marshal(ProtoItem)
-			if err != nil {
-				log.Fatal(err)
-			}
-			go kafkaProducer(marshaled, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
-		}
+		kafkaProducer(byteChannel, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
 	}
 
 }
@@ -75,7 +48,22 @@ func printer(data []byte) {
 	f.Write(data)
 }
 
-func kafkaProducer(data []byte, topic string, brokers []string) {
+func kafkaProducer(byteChannel chan []byte, topic string, brokers []string) {
+	var data []byte
+	if Configuration.Raw {
+		data = <-byteChannel
+	} else {
+		ProtoItem := new(telemetryBis.Telemetry)
+		err := proto.Unmarshal(<-byteChannel, ProtoItem)
+		if err != nil {
+			log.Fatal(err)
+		}
+		marshaled, err := json.Marshal(ProtoItem)
+		if err != nil {
+			log.Fatal(err)
+		}
+		data = marshaled
+	}
 	producer := kafka.NewProducer(topic, brokers)
 	producer.Produce(data)
 }
