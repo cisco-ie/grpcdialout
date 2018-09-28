@@ -33,13 +33,13 @@ func (d *dummyPeerType) Network() string {
 
 var dummyPeer dummyPeerType
 
-func decrypt(byteChannel chan []byte) {
-
-	//byteChannel <- data.Data
+func decrypt(data *dialout.MdtDialoutArgs) {
+	// byteChannel := make(chan []byte)
+	// byteChannel <- data.Data
 
 	if Configuration.Kafka.Brokers != nil {
 		log.Println("Message Received")
-		go kafkaProducer(byteChannel, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
+		kafkaProducer(byteChannel, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
 	}
 
 }
@@ -49,14 +49,14 @@ func printer(data []byte) {
 	f.Write(data)
 }
 
-func kafkaProducer(byteChannel chan []byte, topic string, brokers []string) {
+func kafkaProducer(byteChannel []byte, topic string, brokers []string) {
 	var data []byte
 	if Configuration.Raw {
-		data = <-byteChannel
+		data = byteChannel
 	} else {
 		log.Println("UnMarshaling Data")
 		ProtoItem := new(telemetryBis.Telemetry)
-		err := proto.Unmarshal(<-byteChannel, ProtoItem)
+		err := proto.Unmarshal(byteChannel, ProtoItem)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -81,7 +81,7 @@ func (s *grpcLocalServer) MdtDialout(stream dialout.GRPCMdtDialout_MdtDialoutSer
 		}
 	}
 	fmt.Printf("Receiving dialout stream from %s!\n", endpoint.Addr.String())
-	byteChannel := make(chan []byte)
+
 	for {
 		var in *dialout.MdtDialoutArgs
 		var err error
@@ -93,8 +93,7 @@ func (s *grpcLocalServer) MdtDialout(stream dialout.GRPCMdtDialout_MdtDialoutSer
 		if err != nil {
 			return err
 		}
-		byteChannel <- in.Data
-		go decrypt(byteChannel)
+		go decrypt(in)
 		newerr := stream.Send(&dialout.MdtDialoutArgs{ReqId: in.ReqId})
 		if newerr != nil {
 			return newerr
