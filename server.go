@@ -39,7 +39,7 @@ func decrypt(data *dialout.MdtDialoutArgs) {
 
 	if Configuration.Kafka.Brokers != nil {
 		log.Println("Message Received")
-		kafkaProducer(byteChannel, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
+		kafkaProducer(data.Data, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
 	}
 
 }
