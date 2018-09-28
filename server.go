@@ -38,6 +38,7 @@ func decrypt(data *dialout.MdtDialoutArgs) {
 	byteChannel <- data.Data
 
 	if Configuration.Kafka.Brokers != nil {
+		log.Println("Message Received")
 		kafkaProducer(byteChannel, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
 	}
 
@@ -53,6 +54,7 @@ func kafkaProducer(byteChannel chan []byte, topic string, brokers []string) {
 	if Configuration.Raw {
 		data = <-byteChannel
 	} else {
+		log.Println("UnMarshaling Data")
 		ProtoItem := new(telemetryBis.Telemetry)
 		err := proto.Unmarshal(<-byteChannel, ProtoItem)
 		if err != nil {
