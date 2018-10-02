@@ -34,11 +34,7 @@ func (d *dummyPeerType) Network() string {
 var dummyPeer dummyPeerType
 
 func decrypt(data *dialout.MdtDialoutArgs) {
-	// byteChannel := make(chan []byte)
-	// byteChannel <- data.Data
-
 	if Configuration.Kafka.Brokers != nil {
-		log.Println("Message Received")
 		kafkaProducer(data.Data, Configuration.Kafka.Topic, Configuration.Kafka.Brokers)
 	}
 
@@ -54,7 +50,6 @@ func kafkaProducer(byteChannel []byte, topic string, brokers []string) {
 	if Configuration.Raw {
 		data = byteChannel
 	} else {
-		log.Println("UnMarshaling Data")
 		ProtoItem := new(telemetryBis.Telemetry)
 		err := proto.Unmarshal(byteChannel, ProtoItem)
 		if err != nil {
@@ -93,7 +88,7 @@ func (s *grpcLocalServer) MdtDialout(stream dialout.GRPCMdtDialout_MdtDialoutSer
 		if err != nil {
 			return err
 		}
-		go decrypt(in)
+		decrypt(in)
 		newerr := stream.Send(&dialout.MdtDialoutArgs{ReqId: in.ReqId})
 		if newerr != nil {
 			return newerr
